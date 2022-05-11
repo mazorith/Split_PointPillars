@@ -96,14 +96,14 @@ model: {
 
 
 train_input_reader: {
-  record_file_path: "/data/sets/kitti_second/kitti_train.tfrecord"
+  record_file_path: "/media/mazorith/External1/KittiDataSet/kitti_second/kitti_train.tfrecord"
   class_names: ["Car"]
   max_num_epochs : 160
   batch_size: 2
   prefetch_size : 25
   max_number_of_voxels: 12000
   shuffle_points: true
-  num_workers: 2
+  num_workers: 0
   groundtruth_localization_noise_std: [0.25, 0.25, 0.25]
   groundtruth_rotation_uniform_noise: [-0.15707963267, 0.15707963267]
   global_rotation_uniform_noise: [-0.78539816, 0.78539816]
@@ -114,7 +114,7 @@ train_input_reader: {
   groundtruth_points_drop_percentage: 0.0
   groundtruth_drop_max_keep_points: 15
   database_sampler {
-    database_info_path: "/data/sets/kitti_second/kitti_dbinfos_train.pkl"
+    database_info_path: "/media/mazorith/External1/KittiDataSet/kitti_second/kitti_dbinfos_train.pkl"
     sample_groups {
       name_to_max_num {
         key: "Car"
@@ -140,8 +140,8 @@ train_input_reader: {
 
   remove_unknown_examples: false
   remove_environment: false
-  kitti_info_path: "/data/sets/kitti_second/kitti_infos_train.pkl"
-  kitti_root_path: "/data/sets/kitti_second"
+  kitti_info_path: "/media/mazorith/External1/KittiDataSet/kitti_second/kitti_infos_train.pkl"
+  kitti_root_path: "/media/mazorith/External1/KittiDataSet/kitti_second/"
 }
 
 train_config: {
@@ -172,16 +172,16 @@ train_config: {
 }
 
 eval_input_reader: {
-  record_file_path: "/data/sets/kitti_second/kitti_val.tfrecord"
+  record_file_path: "/media/mazorith/External1/KittiDataSet/kitti_second/kitti_val.tfrecord"
   class_names: ["Car"]
   batch_size: 2
   max_num_epochs : 160
   prefetch_size : 25
   max_number_of_voxels: 12000
   shuffle_points: false
-  num_workers: 3
+  num_workers: 0
   anchor_area_threshold: 1
   remove_environment: false
-  kitti_info_path: "/data/sets/kitti_second/kitti_infos_val.pkl"
-  kitti_root_path: "/data/sets/kitti_second"
+  kitti_info_path: "/media/mazorith/External1/KittiDataSet/kitti_second/kitti_infos_val.pkl"
+  kitti_root_path: "/media/mazorith/External1/KittiDataSet/kitti_second/"
 }

@@ -193,3 +193,32 @@ class PointPillarsScatter(nn.Module):
         print('canvas:', batch_canvas.shape)
 
         return batch_canvas
+
+
+class ScatterEncoderToBN(nn.Module):
+	def __init__(self):
+		super.__init__()
+		self.name='ScatterEncoder'
+		
+	def forward(self, canvas_inputs):
+		l0 = nn.MaxPool2d((2,2), stride = (2,2))
+		l1 = nn.MaxPool2d((2,2), stride = (2,2))
+		output = l1(l0(canvas_inputs))
+
+		return output
+
+
+class BNDecoderToScatter(nn.Module):
+        def __init__(self):
+            super.__init__()
+            self.name='ScatterDecoder'
+
+        def forward(self, input, input_size): ## might want make input_size class variable
+            l0 = nn.ConvTranspose2d(input_size[1], input_size[1], 4, 2, 1)
+            l1 = nn.ConvTranspose2d(input_size[1], input_size[1], 4, 2, 1)
+            l2 = nn.Linear(input_size[3], input_size[3])
+
+            output = l2(l1(l0(input)))
+
+            return output
+
