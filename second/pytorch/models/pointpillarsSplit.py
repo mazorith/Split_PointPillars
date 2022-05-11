@@ -197,7 +197,7 @@ class PointPillarsScatter(nn.Module):
 
 class ScatterEncoderToBN(nn.Module):
 	def __init__(self):
-		super.__init__()
+		super().__init__()
 		self.name='ScatterEncoder'
 		
 	def forward(self, canvas_inputs):
@@ -210,7 +210,7 @@ class ScatterEncoderToBN(nn.Module):
 
 class BNDecoderToScatter(nn.Module):
         def __init__(self):
-            super.__init__()
+            super().__init__()
             self.name='ScatterDecoder'
 
         def forward(self, input, input_size): ## might want make input_size class variable

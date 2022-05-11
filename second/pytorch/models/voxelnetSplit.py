@@ -567,7 +567,7 @@ class VoxelNet(nn.Module):
         self._direction_loss_weight = direction_loss_weight
         self._cls_loss_weight = cls_loss_weight
         self._loc_loss_weight = loc_loss_weight
-		self.teacher = teacher
+        self.teacher = teacher
         vfe_class_dict = {
             "VoxelFeatureExtractor": VoxelFeatureExtractor,
             "VoxelFeatureExtractorV2": VoxelFeatureExtractorV2,
@@ -595,16 +595,6 @@ class VoxelNet(nn.Module):
             self.middle_feature_extractor = PointPillarsScatter(output_shape=output_shape,
                                                                 num_input_features=vfe_num_filters[-1])
             num_rpn_input_filters = self.middle_feature_extractor.nchannels
-            # ==========================================================
-            # Split addition here
-            # ==========================================================
-			if not teacher:
-	            self.head_encoder = ScatterEncoderToBN()
-	            self.head_decoder = BNDecoderToScatter()
-            # ==========================================================
-            # end split addition
-            # ==========================================================
-              
         else:
             mid_class_dict = {
                 "MiddleExtractor": MiddleExtractor,
@@ -624,7 +614,16 @@ class VoxelNet(nn.Module):
                     num_rpn_input_filters = int(middle_num_filters_d1[-1] * 2)
             else:
                 num_rpn_input_filters = int(middle_num_filters_d2[-1] * 2)
-
+        # ==========================================================
+        # Split addition here
+        # ==========================================================
+        if not self.teacher:
+            self.head_encoder = ScatterEncoderToBN()
+            self.head_decoder = BNDecoderToScatter()
+            print("Create Encoder")
+        # ==========================================================
+        # end split addition
+        # ==========================================================
         rpn_class_dict = {
             "RPN": RPN,
         }
@@ -680,8 +679,8 @@ class VoxelNet(nn.Module):
         # num_points: [num_voxels]
         # coors: [num_voxels, 4]
         
-        headfreeze = False
-        tailfreeze = False
+        headfreeze = True
+        tailfreeze = True
 
         voxel_features = self.voxel_feature_extractor(voxels, num_points, coors, requries_grad = headfreeze)
         if self._use_sparse_rpn:
@@ -690,10 +689,10 @@ class VoxelNet(nn.Module):
             spatial_features = self.middle_feature_extractor(
                 voxel_features, coors, batch_size_dev, requires_grad = headfreeze)
             #=====================
-			if not self.teacher:
-            	EncoderOutput = self.Encoder(spatial_features, requires_grad = headfreeze)
-            	DecoderOuput = self.Decoder(EncoderOutput, requires_grad = tailfreeze)
-				spatial_features = DecoderOutput
+            if not self.teacher:
+                EncoderOutput = self.head_encoder(spatial_features, requires_grad = headfreeze)        
+                DecoderOuput = self.head_decoder(EncoderOutput, requires_grad = tailfreeze)
+                spatial_features = DecoderOutput
             #=====================
             if self._use_bev:
                 preds_dict = self.rpn(spatial_features, example["bev_map"])
@@ -1163,3 +1162,4 @@ def get_direction_target(anchors, reg_targets, one_hot=True):
     return dir_cls_targets
 
 def EDloss ():
+    return 0

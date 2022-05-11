@@ -186,13 +186,14 @@ def split(config_path, model_dir,
     # Student Net
     #########################################
     print(model_cfg)
-    student = second_builder.build(model_cfg, voxel_generator, target_assigner,False)
+    student = second_builder.build(model_cfg, voxel_generator, target_assigner, False)
     student.cuda()
     print(student.teacher) 
 
     #########################################
     # Load parameter to Student Net
     #########################################
+    print(student.head_encoder)
     student.rpn = copy.deepcopy(net.rpn)
     student.voxel_feature_extractor = copy.deepcopy(net.voxel_feature_extractor)
     student.middle_feature_extractor = copy.deepcopy(net.middle_feature_extractor)

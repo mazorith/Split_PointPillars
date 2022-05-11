@@ -17,7 +17,7 @@
 
 from second.protos import second_pb2
 from second.pytorch.builder import losses_builder
-from second.pytorch.models.voxelnet import LossNormType, VoxelNet
+from second.pytorch.models.voxelnetSplit import LossNormType, VoxelNet
 
 
 def build(model_cfg: second_pb2.VoxelNet, voxel_generator,
