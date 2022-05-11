@@ -532,7 +532,8 @@ class VoxelNet(nn.Module):
                  cls_loss_ftor=None,
                  voxel_size=(0.2, 0.2, 4),
                  pc_range=(0, -40, -3, 70.4, 40, 1),
-                 name='voxelnet'
+                 name='voxelnet',
+				 teacher = True
                  ):
         super().__init__()
         self.name = name
@@ -566,7 +567,7 @@ class VoxelNet(nn.Module):
         self._direction_loss_weight = direction_loss_weight
         self._cls_loss_weight = cls_loss_weight
         self._loc_loss_weight = loc_loss_weight
-
+		self.teacher = teacher
         vfe_class_dict = {
             "VoxelFeatureExtractor": VoxelFeatureExtractor,
             "VoxelFeatureExtractorV2": VoxelFeatureExtractorV2,
@@ -597,8 +598,9 @@ class VoxelNet(nn.Module):
             # ==========================================================
             # Split addition here
             # ==========================================================
-            self.head_encoder = ScatterEncoderToBN()
-            self.head_decoder = BNDecoderToScatter()
+			if not teacher:
+	            self.head_encoder = ScatterEncoderToBN()
+	            self.head_decoder = BNDecoderToScatter()
             # ==========================================================
             # end split addition
             # ==========================================================
@@ -688,8 +690,10 @@ class VoxelNet(nn.Module):
             spatial_features = self.middle_feature_extractor(
                 voxel_features, coors, batch_size_dev, requires_grad = headfreeze)
             #=====================
-            EncoderOutput = self.Encoder(spatial_features, requires_grad = headfreeze)
-            DecoderOuput = self.Decoder(EncoderOutput, requires_grad = tailfreeze)
+			if not self.teacher:
+            	EncoderOutput = self.Encoder(spatial_features, requires_grad = headfreeze)
+            	DecoderOuput = self.Decoder(EncoderOutput, requires_grad = tailfreeze)
+				spatial_features = DecoderOutput
             #=====================
             if self._use_bev:
                 preds_dict = self.rpn(spatial_features, example["bev_map"])

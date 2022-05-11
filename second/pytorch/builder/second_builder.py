@@ -21,7 +21,7 @@ from second.pytorch.models.voxelnet import LossNormType, VoxelNet
 
 
 def build(model_cfg: second_pb2.VoxelNet, voxel_generator,
-          target_assigner) -> VoxelNet:
+          target_assigner, t = True) -> VoxelNet:
     """build second pytorch instance.
     """
     if not isinstance(model_cfg, second_pb2.VoxelNet):
@@ -91,6 +91,7 @@ def build(model_cfg: second_pb2.VoxelNet, voxel_generator,
         cls_loss_ftor=cls_loss_ftor,
         target_assigner=target_assigner,
         voxel_size=voxel_generator.voxel_size,
-        pc_range=voxel_generator.point_cloud_range
+        pc_range=voxel_generator.point_cloud_range,
+	teacher = t
     )
     return net

@@ -231,6 +231,8 @@ def split(config_path, model_dir,
     # Train Student
     #########################################
     student_model_dir = (model_dir).joinpath('student')
+    if not student_model_dir.exists():
+        student_model_dir.mkdir()
     torchplus.train.save_models(student_model_dir, [student, optimizer], net.get_global_step())
     studentTmp = second_builder.build(model_cfg, voxel_generator, target_assigner,False) 
     torchplus.train.try_restore_latest_checkpoints(student_model_dir, [studentTmp])
