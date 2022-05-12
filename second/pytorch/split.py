@@ -38,7 +38,27 @@ class distillModel:
         self.name = 'TeacherNet'
         self.teacher = Model
 
+def example_convert_to_torch(example, dtype=torch.float32,
+                             device=None) -> dict:
+    device = device or torch.device("cuda:0")
+    example_torch = {}
+    float_names = [
+        "voxels", "anchors", "reg_targets", "reg_weights", "bev_map", "rect",
+        "Trv2c", "P2"
+    ]
 
+    for k, v in example.items():
+        if k in float_names:
+            example_torch[k] = torch.as_tensor(v, dtype=dtype, device=device)
+        elif k in ["coordinates", "labels", "num_points"]:
+            example_torch[k] = torch.as_tensor(
+                v, dtype=torch.int32, device=device)
+        elif k in ["anchors_mask"]:
+            example_torch[k] = torch.as_tensor(
+                v, dtype=torch.uint8, device=device)
+        else:
+            example_torch[k] = v
+    return example_torch
 def split(config_path, model_dir,
           result_path=None,
           create_folder=False,
@@ -171,6 +191,7 @@ def split(config_path, model_dir,
         num_workers=eval_input_cfg.num_workers,
         pin_memory=False,
         collate_fn=merge_second_batch)
+    data_iter = iter(dataloader)
     #########################################
     # Find Max
     #########################################
@@ -229,13 +250,36 @@ def split(config_path, model_dir,
     teacher = second_builder.build(model_cfg, voxel_generator, target_assigner,True)
     torchplus.train.try_restore_latest_checkpoints(teacher_model_dir, [teacher])
     #########################################
-    # Train Student
+    # Create Student
     #########################################
     student_model_dir = (model_dir).joinpath('student')
     if not student_model_dir.exists():
         student_model_dir.mkdir()
     torchplus.train.save_models(student_model_dir, [student, optimizer], net.get_global_step())
+    #########################################
+    # Load Student
+    #########################################
     studentTmp = second_builder.build(model_cfg, voxel_generator, target_assigner,False) 
     torchplus.train.try_restore_latest_checkpoints(student_model_dir, [studentTmp])
+    #########################################
+    # Training
+    #########################################
+    student.freezeAll()
+    for name,param in student.named_parameters():
+        print(name,param.requires_grad)
+    try:
+        example = next(data_iter)
+    except StopIteration:
+        print("end epoch")
+        if clear_metrics_every_epoch:
+            net.clear_metrics()
+        data_iter = iter(dataloader)
+        example = next(data_iter)
+    example_torch = example_convert_to_torch(example, float_dtype)
+
+    batch_size = example["anchors"].shape[0]
+    print(example_torch)
+    ret_dict = net(example_torch)
+    print(ret_dict)
 if __name__ == '__main__':
     fire.Fire()

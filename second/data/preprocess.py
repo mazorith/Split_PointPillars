@@ -308,26 +308,26 @@ def _read_and_prep_v9(info, root_path, num_point_features, prep_func):
     """
     # velodyne_path = str(pathlib.Path(root_path) / info['velodyne_path'])
     # velodyne_path += '_reduced'
-    v_path = pathlib.Path(root_path) / info['velodyne_path']
+    v_path = pathlib.Path(root_path) / info['point_cloud']['velodyne_path']
     v_path = v_path.parent.parent / (
         v_path.parent.stem + "_reduced") / v_path.name
 
     points = np.fromfile(
         str(v_path), dtype=np.float32,
         count=-1).reshape([-1, num_point_features])
-    image_idx = info['image_idx']
-    rect = info['calib/R0_rect'].astype(np.float32)
-    Trv2c = info['calib/Tr_velo_to_cam'].astype(np.float32)
-    P2 = info['calib/P2'].astype(np.float32)
+    image_idx = info['image']['image_idx']
+    rect = info['calib']['R0_rect'].astype(np.float32)
+    Trv2c = info['calib']['Tr_velo_to_cam'].astype(np.float32)
+    P2 = info['calib']['P2'].astype(np.float32)
 
     input_dict = {
         'points': points,
         'rect': rect,
         'Trv2c': Trv2c,
         'P2': P2,
-        'image_shape': np.array(info["img_shape"], dtype=np.int32),
+        'image_shape': np.array(info['image']["image_shape"], dtype=np.int32),
         'image_idx': image_idx,
-        'image_path': info['img_path'],
+        'image_path': info['image']['image_path'],
         # 'pointcloud_num_features': num_point_features,
     }
 
